@@ -1,4 +1,5 @@
 GoldDigger::Application.routes.draw do
+  get "simulator/simulation"
   get "static_pages/home"
   get "static_pages/algorithm"
   get "static_pages/about"
