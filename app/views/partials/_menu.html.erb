@@ -5,11 +5,11 @@
       <a class="navbar-brand" href="/">Gold Digger</a>
     </div>
     <div class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li><%= link_to "Home", root_path %></li>
-        <li><%= link_to "Simulator", simulation_path %></li>
-        <li><%= link_to "Algorithm", algorithm_path %></li>
-        <li><%= link_to "About us", about_path %></li>
+      <ul class="nav navbar-nav" id="menu">
+        <li class = "<%= 'active' if params[:action] == 'home' %>"><%= link_to "Home", root_path %></li>
+        <li class = "<%= 'active' if params[:action] == 'simulation' %>"><%= link_to "Simulator", simulation_path %></li>
+        <li class = "<%= 'active' if params[:action] == 'algorithm' %>"><%= link_to "Algorithm", algorithm_path %></li>
+        <li class = "<%= 'active' if params[:action] == 'about' %>"><%= link_to "About us", about_path %></li>
       </ul>
     </div>
   </div>
