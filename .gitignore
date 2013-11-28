@@ -12,3 +12,6 @@
 # Ignore RubyMine
 .idea/
 
+# Ignore local settings
+.ruby-version
+.ruby-gemset
