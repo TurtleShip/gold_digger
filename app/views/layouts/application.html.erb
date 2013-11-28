@@ -1,14 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>GoldDigger</title>
-  <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
+  <%= stylesheet_link_tag "application", media: "all", "data-turbolinks-track" => true %>
   <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
   <%= csrf_meta_tags %>
 </head>
 <body>
+<%= render :partial => './partials/menu' %>
 
-<%= yield %>
+<div id="space_after_menu"></div>
+<div class="container">
+  <%= yield %>
+</div>
+
+<%= render :partial => './partials/footer' %>
 
 </body>
 </html>
