@@ -1,5 +1,31 @@
-<h3>This is a simulator!</h3>
+<h3>Movement of the best bot at generation <div id="gen_id"></div></h3>
 
-<div id="canvas">
+<canvas id="canvas">
+This is canvas :-)
+</canvas>
 
-</div>
+
+<p>
+  Population size:
+  <select id="bot_total_select">
+    <option value="25">25</option>
+    <option value="50" selected="">50</option>
+    <option value="100">100</option>
+  </select>
+  <br/>
+
+  Speed:
+  <select id="speed_select">
+    <option value="100">Super sonic</option>
+    <option value="500">Fast</option>
+    <option value="2000" selected="">Normal</option>
+    <option value="3000">Slow</option>
+  </select>
+  <br/>
+
+  <button id="create_button">Create a new board</button>
+  <button id="start_button">Start</button>
+  <button id="pause_button" disabled>Pause</button>
+  <button id="stop_button" disabled>Stop</button>
+  <br>
+</p>
