@@ -5,20 +5,9 @@ var brush; // with this brush, we will paint our canvas
 var cell_size = 10; // size of each element in the board
 var board_width = 50;
 var board_height = 50;
-
-// All possible elements that can be placed on board
-var elm_total = 0;
-var gold_total = 25;
-var empty = elm_total++, bot = elm_total++;
-var mine = elm_total++, stone = elm_total++, knife = elm_total++, bullet = elm_total++;
-var gold = elm_total++;
-var empty_color = 'Gainsboro';
-var bot_color = 'green';
-var mine_color = 'red';
-var stone_color = 'Chocolate';
-var knife_color = 'Orange';
-var bullet_color = 'OrangeRed';
-var gold_color = 'yellow';
+var gold_total = 15;
+var mine_total = 10;
+var enemy_total = 25;
 
 // variables that receive user inputs
 var start_button;
@@ -30,22 +19,33 @@ var speed_select;
 
 var simulator;
 
+// variables to output results
+var gen_id;
+var gen_id_show;
+var best_score;
+var best_score_show;
+var average_score;
+var average_score_show;
+var worst_score;
+var worst_score_show;
+var best_bot;
+var best_path;
+
+
 var settings = {
-    interval: 3000, // 3 seconds by default
-    bot_total: 25,
-    gen_total: 10
+    interval: -1, // uninitialized
+    bot_total: -1, // uninitialized
+    gen_total: 25
 };
 
-var move = [[1,0],[-1,0],[0,1],[0,-1]];
-
-
-
-board = new Array(board_height);
-for(var i = 0; i < board_height; i++) {
-    board[i] = new Array(board_width);
-}
 var bot_loc;
-
+var bots;
+var move = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1]
+];
 
 
 function changeSettings(key, value) {
@@ -53,126 +53,91 @@ function changeSettings(key, value) {
     settings[key] = value;
 }
 
-// paint board empty
-function emptyBoard() {
-    for(var row = 0; row < board_height; row++) {
-        for(var col = 0; col < board_width; col++) {
-            // start out empty for now
-            board[row][col] = empty;
-        }
-    }
-
-}
-
-function getRandNum (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function getRandCoord() {
-    return [getRandNum(0, board_height-1), getRandNum(0, board_width-1)];
-}
-
-function putElement(coord, elm_type) {
-    board[coord[0]][coord[1]] = elm_type;
-}
-
-function putElementRandom(elm_type) {
-    var found = false;
-    while(!found){
-        var coord = getRandCoord();
-        if(board[coord[0]][coord[1]] == empty) {
-            board[coord[0]][coord[1]] = elm_type;
-            found =true;
-        }
-    }
-}
-
-// Create a new board
-function createBoard() {
-    emptyBoard();
-    // get new location for our bot
-    bot_loc = getRandCoord();
-    putElement(bot_loc, bot);
-    for(var i = 0; i < gold_total; i++) {
-        putElementRandom(gold);
-    }
-
-    console.log(bot_loc);
-    paintBoard();
-}
-
-function updateBoard() {
-    // update board based on bot's movement
-
-    // erase bot
-    board[bot_loc[0]][bot_loc[1]] = empty;
-    var random_move = move[getRandNum(0, move.length-1)];
-    bot_loc[0] = (bot_loc[0] + random_move[0] + board_height) % board_height;
-    bot_loc[1] = (bot_loc[1] + random_move[1] + board_width) % board_width;
-
-    board[bot_loc[0]][bot_loc[1]] = bot;
-
-}
-
 function paintCell(row, col, color) {
     brush.fillStyle = color;
-    brush.fillRect(col*cell_size, row*cell_size, cell_size, cell_size);
+    brush.fillRect(col * cell_size, row * cell_size, cell_size, cell_size);
 }
 
 function paintBoard() {
-    // reset the canvas
-    brush.fillStyle = "#FFFFFF";
-    brush.fillRect(0,0, board_width * cell_size, board_height * cell_size);
-
-    for(var row = 0; row < board_height; row++) {
-        for(var col = 0; col < board_width; col++) {
-            var element = board[row][col];
-
-            switch(element) {
-                case empty:
-                    paintCell(row, col, empty_color);
-                    break;
-                case bot:
-                    paintCell(row, col, bot_color);
-                    console.log("Bot at " + row + " , " + col);
-                    break;
-                case mine:
-                    paintCell(row, col, mine_color);
-                    break;
-                case stone:
-                    paintCell(row, col, stone_color);
-                    break;
-                case knife:
-                    paintCell(row, col, knife_color);
-                    break;
-                case bullet:
-                    paintCell(row, col, bullet_color);
-                    break;
-                case gold:
-                    paintCell(row, col, gold_color);
-                    break;
-                default:
-                    console.log("Unrecognized element of value " + element);
-            }
+    var cur_board = board.getBoard();
+    for (var row = 0; row < board_height; row++) {
+        for (var col = 0; col < board_width; col++) {
+            var element = cur_board[row][col];
+            paintCell(row, col, element.getColor());
         }
     }
 }
 
-function simulateGeneration() {
-    // run genentic algorithm
-    console.log("Simulating a generation");
-    updateBoard();
-    paintBoard();
-//    if(cur_gen == settings.gen_total) {
-//        clearInterval(simulator);
-//    }
+// simulate one step within a generation
+function simulateStep(step_id) {
+    console.log("step : " + step_id);
+    if (step_id < best_path.length) {
+        board.updateBoard(best_path[step_id][0], best_path[step_id][1], "hello");
+        paintBoard();
+        var caller = arguments.callee;
+        simulator = setTimeout(function () {
+            caller(step_id + 1);
+        }, settings.interval);
+    } else {
+//        finishGeneration();
+    }
 }
 
+function startGeneration() {
+    console.log("Simulating a generation " + gen_id);
+    gen_id_show.text(gen_id);
+
+    // TODO: simulate bots and save results
+    best_path = bots.simulateOneGeneration();
+//    res = bots.simulateOneGeneration();
+//    res["best_path"];
+//    res["best_score"];
+//    res["survival_rate"];
+//    [best_bot, best_score] = Bots.runOneGeneration();
+//
+//    console.log("best_path length: " + best_path.length);
+//    console.log("best_path: " + best_path);
+    simulateStep(0);
+}
+
+function finishGeneration() {
+
+    // TODO: output results here
+
+    // TODO: make next generation
+//    bots.breedNextGeneration();
 
 
+    gen_id++;
+    startGeneration();
+}
+
+function createBoard() {
+    board = new Board(board_width, board_height, gold_total, mine_total, enemy_total);
+    board.initBoard();
+    paintBoard();
+    console.log("Board initilized....");
+    var wat = board.clone();
+}
 function runSimulation() {
     console.log("simulating at speed " + settings.interval);
-    simulator = setInterval(function(){simulateGeneration()}, settings.interval);
+
+    // TODO: create bots here
+    var elm_set = board.getElementSettings();;
+
+    var game_info = {
+        board: board.clone(),
+        max_score: elm_set.gold.value * gold_total,
+        max_damage_allowed: -(elm_set.mine.damage * mine_total, elm_set.enemy.damage * enemy_total),
+        worst_damage: Math.max(elm_set.mine.damage, elm_set.enemy.damage),
+        ability_limit: 200,
+        max_change_interval: 5
+    };
+
+    // TODO: replace the below line with new BotVillage(settings.bot_total, game_info) later.
+    bots = new BotVillage(1, game_info);
+    bots.initBots();
+    startGeneration();
 }
 
 function start() {
@@ -203,24 +168,24 @@ function stop() {
     stop_button.attr('disabled', 'disabled');
     bot_total_select.removeAttr('disabled');
     speed_select.removeAttr('disabled');
-
     clearInterval(simulator);
+    gen_id = 0;
+    gen_id_show.text(gen_id);
 }
 
 function create() {
     createBoard();
-    create_button.removeAttr('disabled');;
+    create_button.removeAttr('disabled');
     start_button.removeAttr('disabled');
     pause_button.attr('disabled', 'disabled');
     stop_button.attr('disabled', 'disabled');
 
 }
-$(function() {
+$(function () {
     canvas = $("#canvas");
 
-    console.log("deteci")
     // make sure that we are in the correct page
-    if( canvas.length == 0 ) {
+    if (canvas.length == 0) {
         return 0;
     }
     canvas.attr("width", board_width * cell_size);
@@ -231,12 +196,6 @@ $(function() {
     brush = canvas.getContext('2d');
     createBoard();
     console.log("Canvas draw!");
-//    runSimulation();
-//    simulator = setInterval(function(){simulateGeneration()}, 1000);
-//    runSimulation();
-    console.log(canvas.toDataURL('image/png'));
-
-
 
     create_button = $("#create_button");
     start_button = $("#start_button");
@@ -252,10 +211,18 @@ $(function() {
     bot_total_select = $("#bot_total_select");
     speed_select = $("#speed_select");
 
-//    var gen_total_select = $("gen_total_select");
-    bot_total_select.change(function() { changeSettings("bot_total", parseInt(bot_total_select.val())) });
-    speed_select.change(function() { changeSettings("interval", parseInt(speed_select.val())) });
-//    gen_total_select.change(function() { changeSettings("interval", parseInt(gen_total_select.val())) });
+    bot_total_select.change(function () {
+        changeSettings("bot_total", parseInt(bot_total_select.val()))
+    });
+    speed_select.change(function () {
+        changeSettings("interval", parseInt(speed_select.val()))
+    });
 
+    // load the default settings
+    changeSettings("bot_total", parseInt(bot_total_select.val()));
+    changeSettings("interval", parseInt(speed_select.val()));
+
+    gen_id = 0;
+    gen_id_show = $("#gen_id");
 
 })
