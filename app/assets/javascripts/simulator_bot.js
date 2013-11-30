@@ -4,6 +4,8 @@ function BotVillage(population_size, game_info) {
     var max_damage_allowed = game_info.max_damage_allowed;
     var risk_map_size = max_score + Math.abs(max_damage_allowed) + 10;
 
+    var worst_damage = game_info.worst_damage;
+
     var bots = Array(population_size);
     var dir_name = ['up', 'down', 'left', 'right'];
 
@@ -25,37 +27,144 @@ function BotVillage(population_size, game_info) {
     }
 
     this.simulateOneGeneration = function() {
-        var best_path, best_score;
-        for(var i = 0; i < population_size; i++) {
-            // TODO: update best_score and best_path
-            // TODO: based on best_score value
-            best_path = bots[i].exploreTheBoard();
+        console.log("simulating one generation");
+
+        var botsAndPathByScore = new Array(population_size);
+
+        var path;
+        var numDead = 0;
+        for(var i = 0; i < population_size; i++){
+            path = bots[i].exploreTheBoard();
+
+            if (bots[i].score < bots[i].max_damage_allowed){
+                numDead++;
+            }
+            var pair = {bot : bots[i], path : path};
+            botsAndPathByScore[i] = pair;
         }
-        return best_path;
+
+        // Sort the (bot, its_path) pairs by bots' scores. Highest comes first.
+        botsAndPathByScore.sort(function(pair1, pair2){
+            return pair2.bot.score - pair1.bot.score;
+        });
+
+        var result = {
+            best_path : botsAndPathByScore[0].path,
+            best_score : botsAndPathByScore[0].bot.score,
+            survival_rate : 1 - (numDead / population_size)
+        }
+
+        return result;
     }
 
-    this.breedCrossOver = function() {
 
+    this.doMutate = function(prob){
+        var ran = Math.random();
+        return (ran > prob);
     }
 
-    this.breedMutation = function() {
+    this.breedNextGeneration = function(topBot1, topBot2){
+        var cross_overs = Array(population_size);
 
+        var incre = Math.floor(risk_map_size / population_size) * 2;
+
+        var increment1 = incre;
+        var increment2 = incre;
+
+        // This copies genes from bot 1.
+
+        var topTwo = [topBot1, topBot2];
+
+        for(var k = 0; k < topTwo.length; k++){
+            var start, end;
+            var targetBot;
+            if (k == 0){
+                start = 0;
+                end = population_size / 2;
+                bot1 = topBot1;
+                bot2 = topBot2;
+                delta = increment1;
+            } else {
+                start = population_size / 2;
+                end = population_size;
+                bot1 = topBot2;
+                bot2 = topBot1;
+                delta = increment2;
+            }
+
+            for(var i = start; i < end; i++){
+
+                var game_info_dummy = {
+                    // TODO need to fill in board
+                    // board:
+                    ability_limit : 10,
+                    max_damage_allowed : 0,
+                    max_change_interval : 5
+                }
+
+                var init_param_dummy = {
+                    lefty: true,
+                    risk_map: new Array(),
+                    init_dir: dir_name[0],
+                }
+
+                var new_risk_map = new Array(risk_map_size);
+
+                // Fill in risk map
+                for(var j = 0; j < delta; j++){
+                    new_risk_map[j] = 
+                        doMutate(0.98) ? getRandNum(0, worst_damage) : bot1.risk_map[j];
+                }
+
+                for(var j = delta; j < risk_map_size; j++){
+                    new_risk_map[j] =
+                        doMutate(0.98) ? getRandNum(0, worst_damage) : bot2.risk_map[j];
+                }
+
+                var offspring = new Bot(game_info_dummy, init_param_dummy);
+
+                var ability_lim = bot1.scan_range + bot1.max_move;
+
+                // Features with mutation possiblity
+
+                if (doMutate(0.98)){
+                    offspring.scan_range = getRandNum(1, ability_lim - 2);
+                    offspring.max_move = ability_lim - offspring.scan_range;
+                } else {
+                    offspring.scan_range = bot1.scan_range;
+                    offspring.max_move = bot1.max_move;
+                }
+
+                var mutation = Math.floor(Math.random() * 7);
+                offspring.change_freq = doMutate(0.98) ? bot1.change_freq + mutation : bot1.change_freq;
+
+                offspring.is_lefty = doMutate(0.98)? getRandNum(0,1) == 0 : bot1.is_lefty;
+
+                offspring.cur_dir = doMutate(0.98)? dir_name[getRandNum(0, dir_name.length-1)] : bot1.cur_dir;
+
+
+                offspring.moves_before_change = offspring.change_freq;
+
+                offspring.max_damage_allowed = bot1.max_damage_allowed;
+
+                offspring.risk_map = new_risk_map;
+
+                // TODO offspring.board = TODO
+
+                cross_overs[i] = offspring;
+
+                delta = delta + incre;
+
+            }            
+
+        }
+        return cross_overs;
     }
-
-    this.breedNextGeneration = function() {
-        this.breedCrossOver();
-        this.breedMutation();
-
-    }
-
-
 }
-
-
 function Bot(game_info, init_param) {
 
-//    var scan_range = getRandNum(1, game_info.ability_limit - 2);
-    var scan_range = 10;
+    var scan_range = getRandNum(1, game_info.ability_limit - 2);
+    // var scan_range = 10;
     var max_move = game_info.ability_limit - scan_range;
     var change_freq = getRandNum(1, game_info.max_change_interval);
     var max_damage_allowed = game_info.max_damage_allowed;

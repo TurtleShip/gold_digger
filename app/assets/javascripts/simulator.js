@@ -88,7 +88,12 @@ function startGeneration() {
     gen_id_show.text(gen_id);
 
     // TODO: simulate bots and save results
-    best_path = bots.simulateOneGeneration();
+    
+    var result = bots.simulateOneGeneration();
+    best_path = result.best_path;
+    best_score = result.best_score;
+    var survival_rate = result.survival_rate;
+
 //    res = bots.simulateOneGeneration();
 //    res["best_path"];
 //    res["best_score"];
