@@ -7,7 +7,7 @@ var board_width = 50;
 var board_height = 50;
 var gold_total = 15;
 var mine_total = 10;
-var enemy_total = 25;
+var enemy_total = 20;
 
 // variables that receive user inputs
 var start_button;

@@ -2,29 +2,51 @@ function Piece(type, dir, color) {
     var type = type;
     var dir = dir;
     var color = color;
+    var change_freq;
+    var total_move = 0;
 
-    this.setType = function (type) {
-        this.type = type;
+    this.setType = function (new_type) {
+        type = new_type;
     }
     this.getType = function () {
         return type;
     }
 
-    this.setDir = function (dir) {
-        this.dir = dir;
+    this.setDir = function (new_dir) {
+        dir = new_dir;
     }
 
     this.getDir = function () {
         return dir;
     }
 
-    this.setColor = function (color) {
-        this.color = color;
+    this.setColor = function (new_color) {
+        color = new_color;
     }
 
     this.getColor = function () {
         return color;
     }
+
+    this.getChangeFreq = function() {
+        return change_freq;
+    }
+
+    this.setChangeFreq = function(new_change_freq) {
+        change_freq = new_change_freq;
+    }
+
+    this.getTotalMove = function() {
+        return total_move;
+    }
+
+    this.setTotalMove = function(new_total_move) {
+        total_move = new_total_move;
+    }
+
+
+
+
 }
 
 function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
@@ -65,6 +87,12 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
             damage: 10
         }
     };
+
+    // maximum and minimum number of frequency where enemy change direciton
+    // change below values to change the behavior of enemies
+    var min_change_freq = 3;
+    var max_change_freq = 10;
+
     this.clone = function() {
         var new_board = new Board(board_width, board_height, gold_total, mine_total, enemy_total);
         new_board.setBoard(board.clone());
@@ -97,6 +125,9 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
             var coord = this.getRandCoord();
             if (board[coord[0]][coord[1]].getType() == element_settings.empty.type) {
                 board[coord[0]][coord[1]] = new Piece(elm_type, this.getRandDir(), element_settings[elm_type].color);
+                if(elm_type == element_settings.enemy.type) {
+                    board[coord[0]][coord[1]].setChangeFreq(getRandNum(min_change_freq,max_change_freq));
+                }
                 found = true;
             }
         }
@@ -106,6 +137,16 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
     this.getRandDir = function () {
         return dir_name[getRandNum(0, dir_name.length - 1)];
     };
+
+    // get random direction that doesn't equal to the given direction
+    this.getRandDirDiff = function(cur_dir) {
+        var new_dir = cur_dir;
+        while(new_dir == cur_dir) {
+            new_dir = this.getRandDir();
+        }
+        return new_dir;
+
+    }
 
     this.emptyBoard = function () {
         for (var row = 0; row < board_height; row++) {
@@ -208,13 +249,23 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
                         break;
                     case "gold":
                     case "mine":
-                        board[r][c] = prev_board[r][c];
+                        // do NOT override enemies
+                        if(board[r][c].getType() != element_settings.enemy.type) {
+                            board[r][c] = prev_board[r][c];
+                        }
                         break;
                     case "enemy":
-//                        console.log(prev_board[r][c].getType());
-                        var next_move = this.getNextCoord(r,c,prev_board[r][c].getDir());
-//                        console.log("enemy_loc : ( " + next_move["next_row"] + ", " + next_move["next_col"] +")");
-                        board[next_move["next_row"]][next_move["next_col"]] = new Piece(element_settings.enemy.type, next_move["next_dir"],element_settings.enemy.color);
+                        var old_enemy = prev_board[r][c];
+                        if(old_enemy.getTotalMove() % old_enemy.getChangeFreq() == 0) {
+                            old_enemy.setDir(this.getRandDirDiff(old_enemy.getDir()));
+                        }
+                        var next_move = this.getNextCoord(r,c,old_enemy.getDir());
+                        var new_enemy =
+                            new Piece(element_settings.enemy.type, next_move["next_dir"],element_settings.enemy.color);
+                        new_enemy.setChangeFreq((old_enemy.getChangeFreq()));
+                        new_enemy.setTotalMove(old_enemy.getTotalMove()+1);
+
+                        board[next_move["next_row"]][next_move["next_col"]] = new_enemy;
                         break;
                 }
             }
