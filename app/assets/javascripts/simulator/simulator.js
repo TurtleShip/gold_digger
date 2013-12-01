@@ -160,6 +160,10 @@ function Simulator() {
         stop_button.removeAttr('disabled');
         bot_total_select.attr('disabled', 'disabled');
         speed_select.attr('disabled', 'disabled');
+        gold_total_select.attr('disabled', 'disabled');
+        mine_total_select.attr('disabled', 'disabled');
+        enemy_total_select.attr('disabled', 'disabled');
+        damage_allowed_select.attr('disabled','disabled');
         this.runSimulation();
     };
 
@@ -178,6 +182,10 @@ function Simulator() {
         stop_button.attr('disabled', 'disabled');
         bot_total_select.removeAttr('disabled');
         speed_select.removeAttr('disabled');
+        gold_total_select.removeAttr('disabled');
+        mine_total_select.removeAttr('disabled');
+        enemy_total_select.removeAttr('disabled');
+        damage_allowed_select.removeAttr('disabled');
         clearInterval(simulator);
         gen_id = 0;
     };
