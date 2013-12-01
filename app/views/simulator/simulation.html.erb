@@ -1,32 +1,41 @@
 <h3>Movement of the best bot at generation <label id="gen_id">0</label></h3>
 
-<canvas id="canvas">
-This is canvas :-)
-</canvas>
+<div style="float: left;">
+  <canvas id="canvas">
+    This is canvas :-)
+  </canvas>
+</div>
 
+<div style="float: left;">
+  <p>
+    Population size:
+    <select id="bot_total_select">
+      <option value="25">25</option>
+      <option value="50" selected="">50</option>
+      <option value="100">100</option>
+    </select>
+    <br/>
 
-<p>
-  Population size:
-  <select id="bot_total_select">
-    <option value="25">25</option>
-    <option value="50" selected="">50</option>
-    <option value="100">100</option>
-  </select>
-  <br/>
+    Speed:
+    <select id="speed_select">
+      <option value="100">Super sonic</option>
+      <option value="500">Fast</option>
+      <option value="1000" selected="">Normal</option>
+      <option value="2000">Slow</option>
+      <option value="3000">Super slow</option>
+    </select>
+    <br/>
 
-  Speed:
-  <select id="speed_select">
-    <option value="100">Super sonic</option>
-    <option value="500">Fast</option>
-    <option value="1000" selected="">Normal</option>
-    <option value="2000">Slow</option>
-    <option value="3000">Super slow</option>
-  </select>
-  <br/>
+    <button id="create_button">Create a new board</button>
+    <button id="start_button">Start</button>
+    <button id="pause_button" disabled>Pause</button>
+    <button id="stop_button" disabled>Stop</button>
+    <br>
+  </p>
 
-  <button id="create_button">Create a new board</button>
-  <button id="start_button">Start</button>
-  <button id="pause_button" disabled>Pause</button>
-  <button id="stop_button" disabled>Stop</button>
-  <br>
-</p>
+  <pre>
+    best score : <label id="best_score"></label><br/>
+    average score : <label id="avg_score"></label><br/>
+    survivors : <label id="survivors"></label>
+  </pre>
+</div>

@@ -1,30 +1,19 @@
-function Piece(type, dir, color) {
-    var type = type;
-    var dir = dir;
-    var color = color;
+function Piece(new_type, new_dir, new_color) {
+    var type = new_type;
+    var dir = new_dir;
+    var color = new_color;
 
-    this.setType = function (type) {
-        this.type = type;
-    }
     this.getType = function () {
         return type;
-    }
-
-    this.setDir = function (dir) {
-        this.dir = dir;
-    }
+    };
 
     this.getDir = function () {
         return dir;
-    }
-
-    this.setColor = function (color) {
-        this.color = color;
-    }
+    };
 
     this.getColor = function () {
         return color;
-    }
+    };
 }
 
 function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
@@ -117,7 +106,8 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
 
     this.initBoard = function () {
         board = new Array(board_height);
-        for (var i = 0; i < board_height; i++) {
+        var i;
+        for (i = 0; i < board_height; i++) {
             board[i] = new Array(board_width);
         }
 
@@ -126,15 +116,15 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
         var bot = new Piece(element_settings.bot.type, this.getRandDir(), element_settings.bot.color);
         this.putElement([0, 0], bot);
 
-        for (var i = 0; i < gold_total; i++) {
+        for (i = 0; i < gold_total; i++) {
             this.putElementRandom(element_settings.gold.type);
         }
 
-        for (var i = 0; i < mine_total; i++) {
+        for (i = 0; i < mine_total; i++) {
             this.putElementRandom(element_settings.mine.type);
         }
 
-        for (var i = 0; i < enemy_total; i++) {
+        for (i = 0; i < enemy_total; i++) {
             this.putElementRandom(element_settings.enemy.type);
         }
     };
@@ -167,7 +157,7 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
                 res = 'up';
         }
         return res;
-    }
+    };
 
 
     // Get next valid coordinate where the given enemy can move to
@@ -185,19 +175,18 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
                 next_dir = this.getLeft(next_dir);
             }
         }
-        var res = {
+
+        return {
             next_row: next_row,
             next_col: next_col,
             next_dir: next_dir
         };
-        return res;
     };
 
 
     this.updateBoard = function (bot_row, bot_col, bot_dir) {
         var prev_board = board.clone();
         this.emptyBoard();
-//        console.log("emptyed board");
 
         // move other pieces
         for (var r = 0; r < board_height; r++) {
@@ -211,9 +200,7 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
                         board[r][c] = prev_board[r][c];
                         break;
                     case "enemy":
-//                        console.log(prev_board[r][c].getType());
                         var next_move = this.getNextCoord(r,c,prev_board[r][c].getDir());
-//                        console.log("enemy_loc : ( " + next_move["next_row"] + ", " + next_move["next_col"] +")");
                         board[next_move["next_row"]][next_move["next_col"]] = new Piece(element_settings.enemy.type, next_move["next_dir"],element_settings.enemy.color);
                         break;
                 }

@@ -45,10 +45,10 @@ function BotVillage(new_population_size, game_info) {
         cur_gen.sort(this.descendingBotSort);
 
         return {
-            best_path: cur_gen[i].getPath(),
-            best_score: cur_gen[i].getScore(),
+            best_path: cur_gen[0].getPath(),
+            best_score: cur_gen[0].getScore(),
             avg_score: (sum_score / population_size),
-            survival_rate: 1 - (survivors / population_size)
+            survivors: survivors
         };
     };
 
@@ -61,10 +61,11 @@ function BotVillage(new_population_size, game_info) {
         var best_bot = cur_gen[0];
         var second_bot = (cur_gen.length == 1) ? cur_gen[0] : cur_gen[1]; // second best bot
         var gene_interval = Math.floor(risk_map_size / population_size) * 2;
+        var t, i,j;
 
         cur_gen = [];
 
-        for(var t=0; t < 2; t++) {
+        for(t=0; t < 2; t++) {
             var main_bot, support_bot, start, end, gene_from_main;
             if( t == 0 ) {
                 // The first half of population is primarily based on the best bot
@@ -83,16 +84,16 @@ function BotVillage(new_population_size, game_info) {
                 gene_from_main = gene_interval;
             }
 
-            for (var i = start; i < end; i++) {
+            for (i = start; i < end; i++) {
                 var new_risk_map = new Array(risk_map_size);
 
                 // Fill in risk map
-                for (var j = 0; j < gene_from_main; j++) {
+                for (j = 0; j < gene_from_main; j++) {
                     new_risk_map[j] =
                         this.shouldMutate() ? getRandNum(0, worst_damage) : main_bot.getRiskMap()[j];
                 }
 
-                for (var j = gene_from_main; j < risk_map_size; j++) {
+                for (j = gene_from_main; j < risk_map_size; j++) {
                     new_risk_map[j] =
                         this.shouldMutate() ? getRandNum(0, worst_damage) : support_bot.getRiskMap()[j];
                 }

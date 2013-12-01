@@ -22,14 +22,11 @@ var simulator;
 // variables to output results
 var gen_id;
 var gen_id_show;
-var best_score;
-var best_score_show;
-var average_score;
-var average_score_show;
-var worst_score;
-var worst_score_show;
-var best_bot;
+var result;
 var best_path;
+var best_score_show;
+var avg_score_show;
+var survivors_show;
 
 
 var settings = {
@@ -70,7 +67,7 @@ function paintBoard() {
 
 // simulate one step within a generation
 function simulateStep(step_id) {
-    console.log("step : " + step_id);
+//    console.log("step : " + step_id);
     if (step_id < best_path.length) {
         board.updateBoard(best_path[step_id][0], best_path[step_id][1], "hello");
         paintBoard();
@@ -79,7 +76,7 @@ function simulateStep(step_id) {
             caller(step_id + 1);
         }, settings.interval);
     } else {
-//        finishGeneration();
+        finishGeneration();
     }
 }
 
@@ -89,30 +86,23 @@ function startGeneration() {
 
     // TODO: simulate bots and save results
     
-    var result = bots.simulateOneGeneration();
-    best_path = result.best_path;
-    best_score = result.best_score;
-    var survival_rate = result.survival_rate;
+    result = bots.simulateOneGeneration();
 
-//    res = bots.simulateOneGeneration();
-//    res["best_path"];
-//    res["best_score"];
-//    res["survival_rate"];
-//    [best_bot, best_score] = Bots.runOneGeneration();
-//
-//    console.log("best_path length: " + best_path.length);
-//    console.log("best_path: " + best_path);
+    // show results for the current generation
+    best_score_show.text(result.best_score);
+    avg_score_show.text(result.avg_score);
+    survivors_show.text(result.survivors + " out of " + settings.bot_total);
+
+    // display path taken by the best bot of the current generation
+    best_path = result.best_path;
     simulateStep(0);
 }
 
 function finishGeneration() {
 
-    // TODO: output results here
 
     // TODO: make next generation
-//    bots.breedNextGeneration();
-
-
+    bots.breedNextGeneration();
     gen_id++;
     startGeneration();
 }
@@ -141,7 +131,7 @@ function runSimulation() {
     };
 
     // TODO: replace the below line with new BotVillage(settings.bot_total, game_info) later.
-    bots = new BotVillage(1, game_info);
+    bots = new BotVillage(25, game_info);
     bots.initBots();
     startGeneration();
 }
@@ -176,7 +166,7 @@ function stop() {
     speed_select.removeAttr('disabled');
     clearInterval(simulator);
     gen_id = 0;
-    gen_id_show.text(gen_id);
+
 }
 
 function create() {
@@ -230,5 +220,8 @@ $(function () {
 
     gen_id = 0;
     gen_id_show = $("#gen_id");
+    best_score_show = $("#best_score");
+    avg_score_show = $("#avg_score");
+    survivors_show = $("#survivors");
 
 })
