@@ -31,7 +31,7 @@ function Direction() {
         return new_dir;
     };
 
-    // gives the left of the cur_dir
+    //Return the direction when turned left form cur_dir
     this.getLeft = function (cur_dir) {
         var res;
         switch (cur_dir) {
@@ -49,4 +49,25 @@ function Direction() {
         }
         return res;
     };
+
+    // Return the direction when turned right form cur_dir
+    this.getRight = function (cur_dir) {
+        var res;
+        switch (cur_dir) {
+            case 'up':
+                res = 'right';
+                break;
+            case 'right':
+                res = 'down';
+                break;
+            case 'down':
+                res = 'left';
+                break;
+            case 'left':
+                res = 'up';
+                break;
+        }
+        return res;
+    };
+
 }

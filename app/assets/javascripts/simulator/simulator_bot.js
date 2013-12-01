@@ -1,3 +1,6 @@
+/**
+ * Created by Seulgi on 11/30/13.
+ */
 function BotVillage(new_population_size, game_info) {
     var population_size = new_population_size;
     var max_score = game_info.max_score;
@@ -7,7 +10,7 @@ function BotVillage(new_population_size, game_info) {
     var worst_damage = game_info.worst_damage;
     var mutation_rate = 0.2;
     var cur_gen = new Array(population_size);
-    var dir_name = ['up', 'down', 'left', 'right'];
+    var direction = new Direction();
 
     this.initBots = function () {
         for (var i = 0; i < population_size; i++) {
@@ -20,7 +23,7 @@ function BotVillage(new_population_size, game_info) {
             var init_param = {
                 lefty: getRandNum(0, 1) == 0,
                 risk_map: cur_risk_map,
-                init_dir: dir_name[getRandNum(0, dir_name.length - 1)]
+                init_dir: direction.getRandDir()
             };
             cur_gen[i] = new Bot(game_info, init_param);
         }
@@ -100,7 +103,7 @@ function BotVillage(new_population_size, game_info) {
                 var init_param = {
                     lefty: getRandNum(0, 1) == 0,
                     risk_map: new_risk_map,
-                    init_dir: dir_name[getRandNum(0, dir_name.length - 1)]
+                    init_dir: direction.getRandDir()
                 };
 
                 var child = new Bot(game_info, init_param);
@@ -139,6 +142,7 @@ function Bot(game_info, init_param) {
     var init_dir = init_param.init_dir;
     var cur_dir = init_dir;
     var max_hit_taken = -100;
+    var direction = Direction();
 
 
     var moves_before_change = change_freq;
@@ -200,45 +204,6 @@ function Bot(game_info, init_param) {
         cur_dir = init_dir;
     };
 
-    // Returns the direction where turned left from cur_dir
-    this.getLeft = function (cur_dir) {
-        var res;
-        switch (cur_dir) {
-            case 'up':
-                res = 'left';
-                break;
-            case 'left':
-                res = 'down';
-                break;
-            case 'down':
-                res = 'right';
-                break;
-            case 'right':
-                res = 'up';
-        }
-        return res;
-    };
-
-    // Return the direction when turned right form cur_dir
-    this.getRight = function (cur_dir) {
-        var res;
-        switch (cur_dir) {
-            case 'up':
-                res = 'right';
-                break;
-            case 'right':
-                res = 'down';
-                break;
-            case 'down':
-                res = 'left';
-                break;
-            case 'left':
-                res = 'up';
-                break;
-        }
-        return res;
-    };
-
     this.getRiskThreshold = function () {
         return risk_map[score - max_damage_allowed];
     };
@@ -256,10 +221,10 @@ function Bot(game_info, init_param) {
                 found_valid = true;
             } else {
                 if (is_lefty) {
-                    next_dir = this.getLeft(next_dir);
+                    next_dir = direction.getLeft(next_dir);
                     moves_before_change = change_freq;
                 } else {
-                    next_dir = this.getRight(next_dir);
+                    next_dir = direction.getRight(next_dir);
                     moves_before_change = change_freq;
                 }
             }
@@ -307,7 +272,7 @@ function Bot(game_info, init_param) {
         // check if bot needs to change direction
         if (moves_before_change == 0) {
             moves_before_change = change_freq;
-            cur_dir = is_lefty ? this.getLeft(cur_dir) : this.getRight(cur_dir);
+            cur_dir = is_lefty ? direction.getLeft(cur_dir) : direction.getRight(cur_dir);
         }
 
         // see if there is any gold
@@ -391,14 +356,10 @@ function Bot(game_info, init_param) {
 
     this.exploreTheBoard = function () {
         paths = [];
-        console.log("Exploring the board....");
-
         for (var i = 0; i < max_move; i++) {
             this.makeAMove();
             board_builder.updateBoard(cur_row, cur_col, cur_dir);
             paths.push([cur_row, cur_col]);
         }
-
-        console.log("Finished the exploration!");
     };
 }

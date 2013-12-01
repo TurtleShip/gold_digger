@@ -13,7 +13,9 @@
 //= require jquery-1.10.2.min
 //= require turbolinks
 //= require shared
-//= require simulator/simulator_board_runner.js
-//= require simulator_bot
-//= require simulator
+//= require simulator/simulator_direction
+//= require simulator/simulator_piece
+//= require simulator/simulator_board_runner
+//= require simulator/simulator_bot
+//= require simulator/simulator
 //= require static_pages

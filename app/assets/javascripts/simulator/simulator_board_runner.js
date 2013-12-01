@@ -1,3 +1,6 @@
+/**
+ * Created by Seulgi on 11/30/13.
+ */
 function BoardRunner(board_width, board_height, gold_total, mine_total, enemy_total) {
 
     var board;
@@ -91,7 +94,7 @@ function BoardRunner(board_width, board_height, gold_total, mine_total, enemy_to
         while (!found) {
             var coord = this.getRandCoord();
             if (board[coord[0]][coord[1]].getType() == element_settings.empty.type) {
-                board[coord[0]][coord[1]] = new Piece(elm_type, this.getRandDir(), element_settings[elm_type].color);
+                board[coord[0]][coord[1]] = new Piece(elm_type, direction.getRandDir(), element_settings[elm_type].color);
                 if(elm_type == element_settings.enemy.type) {
                     board[coord[0]][coord[1]].setChangeFreq(getRandNum(min_change_freq,max_change_freq));
                 }

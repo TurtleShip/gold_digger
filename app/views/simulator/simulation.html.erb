@@ -11,8 +11,8 @@
     Population size:
     <select id="bot_total_select">
       <option value="10">10</option>
-      <option value="25">25</option>
-      <option value="50" selected="">50</option>
+      <option value="25" selected="">25</option>
+      <option value="50">50</option>
       <option value="100">100</option>
     </select>
     <br/>
@@ -27,6 +27,37 @@
     </select>
     <br/>
 
+    Number of golds:
+    <select id="gold_total_select">
+      <option value="30">30</option>
+      <option value="50" selected="">50</option>
+      <option value="75">75</option>
+      <option value="100">100</option>
+    </select>
+    <br/>
+
+    Number of mines:
+    <select id="mine_total_select">
+      <option value="10">10</option>
+      <option value="20" selected="">20</option>
+      <option value="30">30</option>
+    </select>
+    <br/>
+
+    Number of enemies:
+    <select id="enemy_total_select">
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="30" selected="">30</option>
+      <option value="40">40</option>
+      <option value="50">50</option>
+    </select>
+    <br/>
+    Max damage allowed:
+    <select id="damage_allowed_select">
+      <option value="-50">50</option>
+    </select>
+    <br/>
     <button id="create_button">Create a new board</button>
     <button id="start_button">Start</button>
     <button id="pause_button" disabled>Pause</button>
@@ -40,3 +71,8 @@
     survivors : <label id="survivors"></label>
   </pre>
 </div>
+
+<script>
+    var simulator = new Simulator();
+    simulator.linkToGUI();
+</script>
