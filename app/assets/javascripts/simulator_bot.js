@@ -138,6 +138,7 @@ function Bot(game_info, init_param) {
     var risk_map = init_param.risk_map;
     var init_dir = init_param.init_dir;
     var cur_dir = init_dir;
+    var max_hit_taken = -100;
 
 
     var moves_before_change = change_freq;
@@ -295,7 +296,7 @@ function Bot(game_info, init_param) {
     this.makeAMove = function () {
 
         // Check if this bot is broken
-        if (score < max_damage_allowed) {
+        if (score < max_hit_taken) {
             is_alive = false;
             return;
         }
