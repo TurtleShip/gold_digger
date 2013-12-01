@@ -34,12 +34,13 @@ function BotVillage(new_population_size, game_info) {
         return bot2.getScore() - bot1.getScore();
     };
 
-    this.simulateOneGeneration = function () {
+    this.simulateOneGeneration = function (broadcast) {
 
         var sum_score = 0, survivors = 0;
 
         // Let the current generation explore the board
         for (var i = 0; i < population_size; i++) {
+            broadcast.text("Calculating bot " + i + "...");
             cur_gen[i].exploreTheBoard();
             sum_score += cur_gen[i].getScore();
             survivors += (cur_gen[i].getIsAlive()) ? 1 : 0;

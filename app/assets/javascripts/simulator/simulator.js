@@ -9,8 +9,8 @@ function Simulator() {
     var simulation_board_runner; // The board runner used to simulate the current generation
     var brush; // with this brush, we will paint our canvas
     var cell_size = 10; // size of each element in the board
-    var board_width = 25;
-    var board_height = 25;
+    var board_width = 50;
+    var board_height = 50;
 
 
     // variables that receive user inputs
@@ -40,7 +40,7 @@ function Simulator() {
     // variables to output results
     var cur_gen;
     var gen_id;
-    var gen_id_show;
+    var broadcast;
     var result;
     var best_path;
     var best_score;
@@ -89,10 +89,13 @@ function Simulator() {
     };
 
     this.startGeneration = function() {
-        result = cur_gen.simulateOneGeneration();
+        // let the user know that we are working
+        broadcast.text("Crunching data...");
+
+        result = cur_gen.simulateOneGeneration(broadcast);
 
         // show results for the current generation
-        gen_id_show.text(gen_id);
+        broadcast.text("Movement of the best bot at generation " + gen_id);
         best_score_show.text(result.best_bot.getScore());
         avg_score_show.text(result.avg_score);
         survivors_show.text(result.survivors + " out of " + user_settings.bot_total);
@@ -242,7 +245,7 @@ function Simulator() {
         // paint a board based on th default settings
         this.createBoard();
         gen_id = 0;
-        gen_id_show = $("#gen_id");
+        broadcast = $("#broadcast");
         best_score_show = $("#best_score");
         avg_score_show = $("#avg_score");
         survivors_show = $("#survivors");

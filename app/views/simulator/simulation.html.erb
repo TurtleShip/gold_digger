@@ -1,23 +1,29 @@
-<h3>Movement of the best bot at generation <label id="gen_id">0</label></h3>
 
-<div style="float: left;">
+<div class="float_left">
+  <h3 id="broadcast">Welcome!</h3>
   <canvas id="canvas">
     This is canvas :-)
   </canvas>
 </div>
 
-<div style="float: left;">
+<div class="small_gap">
+&nbsp;
+</div>
+
+<div class="float_left">
+  <h3>&nbsp;</h3>
   <p>
-    Population size:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Population size:&nbsp;
     <select id="bot_total_select">
-      <option value="10">10</option>
-      <option value="25" selected="">25</option>
+      <option value="10" selected="">10</option>
+      <option value="25">25</option>
       <option value="50">50</option>
       <option value="100">100</option>
     </select>
     <br/>
 
-    Speed:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Speed:&nbsp;
     <select id="speed_select">
       <option value="100">Super sonic</option>
       <option value="500">Fast</option>
@@ -27,7 +33,7 @@
     </select>
     <br/>
 
-    Number of golds:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of golds:&nbsp;
     <select id="gold_total_select">
       <option value="30">30</option>
       <option value="50" selected="">50</option>
@@ -36,7 +42,7 @@
     </select>
     <br/>
 
-    Number of mines:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of mines:&nbsp;
     <select id="mine_total_select">
       <option value="10">10</option>
       <option value="20" selected="">20</option>
@@ -44,7 +50,7 @@
     </select>
     <br/>
 
-    Number of enemies:
+    &nbsp;&nbsp;&nbsp;Number of enemies:&nbsp;
     <select id="enemy_total_select">
       <option value="10">10</option>
       <option value="20">20</option>
@@ -53,7 +59,7 @@
       <option value="50">50</option>
     </select>
     <br/>
-    Max damage allowed:
+    Max damage allowed:&nbsp;
     <select id="damage_allowed_select">
       <option value="-50">50</option>
     </select>
@@ -68,14 +74,14 @@
   <pre>
     best score    : <label id="best_score"></label><br/>
     average score : <label id="avg_score"></label><br/>
-    survivors     : <label id="survivors"></label><br/>
+    survivors     : <label id="survivors"></label>
    </pre>
   <pre>
-    <h2>Status of the best bot</h2>
+    <strong>Status of the best bot</strong><br/>
     current score : <label id="cur_score"></label><br/>
     # of moves    : <label id="cur_move"></label><br/>
     scan range    : <label id="best_scan_range"></label><br/>
-    total fuel    : <label id="best_max_move"></label><br/>
+    total fuel    : <label id="best_max_move"></label>
   </pre>
 </div>
 
