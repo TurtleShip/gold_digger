@@ -51,6 +51,7 @@ function Simulator() {
     var best_max_move_show;
     var cur_score_show;
     var cur_move_show;
+    var event_log;
 
 
     this.changeUserSettings = function(key, value) {
@@ -95,12 +96,23 @@ function Simulator() {
         result = cur_gen.simulateOneGeneration(broadcast);
 
         // show results for the current generation
-        broadcast.text("Movement of the best bot at generation " + gen_id);
+        broadcast.text("The best bot at generation " + gen_id);
         best_score_show.text(result.best_bot.getScore());
         avg_score_show.text(result.avg_score);
         survivors_show.text(result.survivors + " out of " + user_settings.bot_total);
         best_scan_show.text(result.best_bot.getScanRange());
         best_max_move_show.text(result.best_bot.getMaxMove());
+
+        // log the result to the event log
+        var log = "generation #"+gen_id + "<br/>";
+        log += "best score : " + result.best_bot.getScore() + "<br/>";
+        log += "avg  score : " + result.avg_score + "<br/>";
+        log += "survivors  : " + result.survivors + "<br/>";
+        log += "scan range : " + result.best_bot.getScanRange() + "<br/>";
+        log += "max fuel   : " + result.best_bot.getMaxMove() + "<br/>";
+        log += "=========================" + "<br/>";
+        event_log.prepend(log);
+
 
         // display path taken by the best bot of the current generation
         best_path = result.best_bot.getPath();
@@ -121,6 +133,7 @@ function Simulator() {
             user_settings.gold_total, user_settings.mine_total, user_settings.enemy_total);
         initial_board_runner.initBoard();
         simulation_board_runner = initial_board_runner.clone();
+        event_log.text(""); // clan event log
         this.paintBoard();
     };
 
@@ -242,8 +255,6 @@ function Simulator() {
         this.changeUserSettings("interval", parseInt(speed_select.val()));
         this.changeUserSettings("damage_allowed", parseInt(damage_allowed_select.val()));
 
-        // paint a board based on th default settings
-        this.createBoard();
         gen_id = 0;
         broadcast = $("#broadcast");
         best_score_show = $("#best_score");
@@ -253,5 +264,9 @@ function Simulator() {
         best_max_move_show = $("#best_max_move");
         cur_score_show = $("#cur_score");
         cur_move_show = $("#cur_move");
+        event_log = $("#event_log");
+
+        // paint a board based on th default settings
+        this.createBoard();
     }
 }
