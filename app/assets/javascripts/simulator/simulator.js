@@ -144,7 +144,7 @@ function Simulator() {
             max_score: elm_set.gold.value * user_settings.gold_total,
             max_damage: -(elm_set.mine.damage * user_settings.mine_total + elm_set.enemy.damage * user_settings.enemy_total),
             max_damage_allowed: user_settings.damage_allowed,
-            ability_limit: 100,
+            ability_limit: Math.floor(board_width*board_height/10),
             max_change_interval: 10
         };
 
