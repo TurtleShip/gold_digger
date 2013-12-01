@@ -6,7 +6,7 @@ function BotVillage(population_size, game_info) {
 
     var worst_damage = game_info.worst_damage;
     var mutation_rate = 0.2;
-    var bots = Array(population_size);
+    var cur_gen = Array(population_size);
     var dir_name = ['up', 'down', 'left', 'right'];
 
     this.initBots = function () {
@@ -22,162 +22,105 @@ function BotVillage(population_size, game_info) {
                 risk_map: cur_risk_map,
                 init_dir: dir_name[getRandNum(0, dir_name.length - 1)]
             }
-            bots[i] = new Bot(game_info, init_param);
+            cur_gen[i] = new Bot(game_info, init_param);
         }
     }
 
-
+    // sort bots in descending order by score
     this.descendingBotSort = function (bot1, bot2) {
         return bot2.getScore() - bot1.getScore();
     }
     this.simulateOneGeneration = function () {
-        console.log("simulating one generation");
 
-        var botsAndPathByScore = new Array(population_size);
+        var sum_score = 0, survivors = 0;
 
-        var path;
-        var numDead = 0;
+        // Let the current generation explore the board
         for (var i = 0; i < population_size; i++) {
-            path = bots[i].exploreTheBoard();
-
-            if (bots[i].score < bots[i].max_damage_allowed) {
-                numDead++;
-            }
-            var pair = {bot: bots[i], path: path};
-            botsAndPathByScore[i] = pair;
+            cur_gen[i].exploreTheBoard();
+            sum_score += cur_gen[i].getScore();
+            survivors += (cur_gen[i].getIsAlive()) ? 1 : 0;
         }
 
-        // Sort the (bot, its_path) pairs by bots' scores. Highest comes first.
-        botsAndPathByScore.sort(function (pair1, pair2) {
-            return pair2.bot.score - pair1.bot.score;
-        });
+        cur_gen.sort(this.descendingBotSort);
 
         var result = {
-            best_path: botsAndPathByScore[0].path,
-            best_score: botsAndPathByScore[0].bot.score,
-            survival_rate: 1 - (numDead / population_size)
+            best_path: cur_gen[i].getPath(),
+            best_score: cur_gen[i].getScore(),
+            avg_score: (sum_score / population_size),
+            survival_rate: 1 - (survivors / population_size)
         }
 
         return result;
-    }
-
-
-    this.doMutate = function (prob) {
-        var ran = Math.random();
-        return (ran > prob);
     }
 
     this.shouldMutate = function () {
         return Math.random() <= mutation_rate;
     }
 
+    this.breedNextGeneration = function() {
 
-    this.breedNextGenerationOld = function (topBot1, topBot2) {
-        var cross_overs = Array(population_size);
+        var best_bot = cur_gen[0];
+        var second_bot = (cur_gen.length == 1) ? cur_gen[0] : cur_gen[1]; // second best bot
+        var gene_interval = Math.floor(risk_map_size / population_size) * 2;
 
+        cur_gen = Array();
 
-        // TODO:
-        var incre = Math.floor(risk_map_size / population_size) * 2;
-
-        var increment1 = incre;
-        var increment2 = incre;
-
-        // This copies genes from bot 1.
-
-        var topTwo = [topBot1, topBot2];
-
-        for (var k = 0; k < topTwo.length; k++) {
-            var start, end;
-            var targetBot; // TODO: what is this variable doing?
-            // TODO: The first half of population mutates based on the best bot
-            if (k == 0) {
+        for(var t=0; t < 2; t++) {
+            var main_bot, support_bot, start, end, gene_from_main;
+            if( t == 0 ) {
+                // The first half of population is primarily based on the best bot
+                main_bot = best_bot;
+                support_bot = second_bot;
                 start = 0;
                 end = population_size / 2;
-                bot1 = topBot1;
-                bot2 = topBot2;
-                delta = increment1;
+                gene_from_main = gene_interval;
+
             } else {
-                // TODO: the second half of population mutates based on the second best bot
+                // The second half of population is primarily based on the best bot
+                main_bot = second_bot;
+                support_bot = best_bot;
                 start = population_size / 2;
                 end = population_size;
-                bot1 = topBot2;
-                bot2 = topBot1;
-                delta = increment2;
+                gene_from_main = gene_interval;
             }
 
             for (var i = start; i < end; i++) {
-
-//                var game_info_dummy = {
-//                    // TODO need to fill in board
-//                    // board:
-//                    ability_limit : 10,
-//                    max_damage_allowed : 0,
-//                    max_change_interval : 5
-//                }
-
-                var init_param_dummy = {
-                    lefty: true,
-                    risk_map: new Array(),
-                    init_dir: dir_name[0]
-                }
-
                 var new_risk_map = new Array(risk_map_size);
 
-                // TODO: factor out mutation probability as variable
                 // Fill in risk map
-                for (var j = 0; j < delta; j++) {
+                for (var j = 0; j < gene_from_main; j++) {
                     new_risk_map[j] =
-                        this.doMutate(0.98) ? getRandNum(0, worst_damage) : bot1.risk_map[j];
+                        this.shouldMutate() ? getRandNum(0, game_info.worst_damage) : main_bot.getRiskMap()[j];
                 }
 
-                for (var j = delta; j < risk_map_size; j++) {
+                for (var j = gene_from_main; j < risk_map_size; j++) {
                     new_risk_map[j] =
-                        this.doMutate(0.98) ? getRandNum(0, worst_damage) : bot2.risk_map[j];
+                        this.shouldMutate() ? getRandNum(0, game_info.worst_damage) : support_bot.getRiskMap()[j];
+                }
+                var init_param = {
+                    lefty: getRandNum(0, 1) == 0,
+                    risk_map: new_risk_map,
+                    init_dir: dir_name[getRandNum(0, dir_name.length - 1)]
                 }
 
-//                var offspring = new Bot(game_info_dummy, init_param_dummy);
-                var offspring = new Bot(game_info, init_param_dummy);
+                var child = new Bot(game_info, init_param);
 
-                // ability_lim is in game_info
-//                var ability_lim = bot1.scan_range + bot1.max_move;
-
-                // Features with mutation possiblity
-
-                if (this.doMutate(0.98)) {
-                    offspring.scan_range = getRandNum(1, ability_lim - 2);
-                    offspring.max_move = ability_lim - offspring.scan_range;
-                } else {
-                    offspring.scan_range = bot1.scan_range;
-                    offspring.max_move = bot1.max_move;
+                // apply mutation probability for each gene
+                if(!this.shouldMutate()) {
+                    child.setScanRange(main_bot.getScanRange());
+                    child.setMaxMove(main_bot.getMaxMove());
                 }
+                if(!this.shouldMutate()) child.setChangeFreq(main_bot.getChangeFreq());
+                if(!this.shouldMutate()) child.setIsLefty(main_bot.getIsLefty());
+                if(!this.shouldMutate()) child.setInitDir(main_bot.getInitdir());
 
-                // TODO: Below line is making change_freq go over max_change_freq
-                var mutation = Math.floor(Math.random() * 7);
-                offspring.change_freq = this.doMutate(0.98) ? bot1.change_freq + mutation : bot1.change_freq;
-
-                offspring.is_lefty = this.doMutate(0.98) ? getRandNum(0, 1) == 0 : bot1.is_lefty;
-
-                offspring.cur_dir = this.doMutate(0.98) ? dir_name[getRandNum(0, dir_name.length - 1)] : bot1.cur_dir;
-
-
-                offspring.moves_before_change = offspring.change_freq;
-
-                offspring.max_damage_allowed = bot1.max_damage_allowed;
-
-                offspring.risk_map = new_risk_map;
-
-                // TODO offspring.board = TODO
-
-                cross_overs[i] = offspring;
-
-                delta = delta + incre;
-
+                cur_gen.push(child);
+                gene_from_main += gene_interval;
             }
-
         }
-        return cross_overs;
     }
 }
+
 function Bot(game_info, init_param) {
 
 
@@ -190,10 +133,12 @@ function Bot(game_info, init_param) {
     var board_width = board_builder.getWidth();
     var board_height = board_builder.getHeight();
     var elm_set = board_builder.getElementSettings();
-
+    var paths;
     var is_lefty = init_param.lefty;
     var risk_map = init_param.risk_map;
-    var cur_dir = init_param.init_dir;
+    var init_dir = init_param.init_dir;
+    var cur_dir = init_dir;
+
 
     var moves_before_change = change_freq;
 
@@ -231,19 +176,28 @@ function Bot(game_info, init_param) {
     this.getIsLefty = function () {
         return is_lefty;
     }
-    this.setIsLeft = function (new_is_lefty) {
+    this.setIsLefty = function (new_is_lefty) {
         is_lefty = new_is_lefty;
-    }
-    this.getCurdir = function () {
-        return cur_dir;
-    }
-    this.setCurDir = function (new_cur_dir) {
-        cur_dir = new_cur_dir;
     }
     this.getScore = function () {
         return score;
     }
-
+    this.getPath = function() {
+        return paths;
+    }
+    this.getIsAlive = function() {
+        return is_alive;
+    }
+    this.getRiskMap = function() {
+        return risk_map;
+    }
+    this.getInitdir = function() {
+        return init_dir;
+    }
+    this.setInitDir = function(new_init_dir) {
+        init_dir = new_init_dir;
+        cur_dir = init_dir;
+    }
 
     // Returns the direction where turned left from cur_dir
     this.getLeft = function (cur_dir) {
@@ -435,7 +389,7 @@ function Bot(game_info, init_param) {
 
 
     this.exploreTheBoard = function () {
-        var paths = Array();
+        paths = Array();
         console.log("Exploring the board....");
 
         for (var i = 0; i < max_move; i++) {
@@ -443,7 +397,7 @@ function Bot(game_info, init_param) {
             board_builder.updateBoard(cur_row, cur_col, cur_dir);
             paths.push([cur_row, cur_col]);
         }
+
         console.log("Finished the exploration!");
-        return paths;
     }
 }
