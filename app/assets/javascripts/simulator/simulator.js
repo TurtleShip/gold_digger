@@ -43,11 +43,14 @@ function Simulator() {
     var gen_id_show;
     var result;
     var best_path;
+    var best_score;
     var best_score_show;
     var avg_score_show;
     var survivors_show;
     var best_scan_show;
     var best_max_move_show;
+    var cur_score_show;
+    var cur_move_show;
 
 
     this.changeUserSettings = function(key, value) {
@@ -75,10 +78,11 @@ function Simulator() {
         if (step_id < best_path.length) {
             simulation_board_runner.updateBoard(best_path[step_id][0], best_path[step_id][1], "NA");
             this.paintBoard();
-            var caller = arguments.callee;
+            cur_score_show.text(best_score[step_id]);
+            cur_move_show.text(step_id+1);
             simulator = setTimeout(function () {
-                caller(step_id + 1);
-            }, user_settings.interval);
+                this.simulateStep(step_id+1);
+            }.bind(this), user_settings.interval);
         } else {
             this.finishGeneration();
         }
@@ -89,12 +93,15 @@ function Simulator() {
 
         // show results for the current generation
         gen_id_show.text(gen_id);
-        best_score_show.text(result.best_score);
+        best_score_show.text(result.best_bot.getScore());
         avg_score_show.text(result.avg_score);
         survivors_show.text(result.survivors + " out of " + user_settings.bot_total);
+        best_scan_show.text(result.best_bot.getScanRange());
+        best_max_move_show.text(result.best_bot.getMaxMove());
 
         // display path taken by the best bot of the current generation
-        best_path = result.best_path;
+        best_path = result.best_bot.getPath();
+        best_score = result.best_bot.getScoreRecord();
         simulation_board_runner = initial_board_runner.clone();
         this.simulateStep(0);
     };
@@ -121,7 +128,7 @@ function Simulator() {
             max_score: elm_set.gold.value * user_settings.gold_total,
             max_damage: -(elm_set.mine.damage * user_settings.mine_total + elm_set.enemy.damage * user_settings.enemy_total),
             max_damage_allowed: user_settings.damage_allowed,
-            ability_limit: 200,
+            ability_limit: 100,
             max_change_interval: 10
         };
 
@@ -240,6 +247,8 @@ function Simulator() {
         avg_score_show = $("#avg_score");
         survivors_show = $("#survivors");
         best_scan_show = $("#best_scan_range");
-        best_max_move_show = $("best_max_move");
+        best_max_move_show = $("#best_max_move");
+        cur_score_show = $("#cur_score");
+        cur_move_show = $("#cur_move");
     }
 }

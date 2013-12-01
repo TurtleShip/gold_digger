@@ -48,8 +48,7 @@ function BotVillage(new_population_size, game_info) {
         cur_gen.sort(this.descendingBotSort);
 
         return {
-            best_path: cur_gen[0].getPath(),
-            best_score: cur_gen[0].getScore(),
+            best_bot: cur_gen[0],
             avg_score: (sum_score / population_size),
             survivors: survivors
         };
@@ -137,14 +136,13 @@ function Bot(game_info, init_param) {
     var board_height = board_builder.getHeight();
     var elm_set = board_builder.getElementSettings();
     var paths;
+    var score_record;
     var is_lefty = init_param.lefty;
     var risk_map = init_param.risk_map;
     var init_dir = init_param.init_dir;
     var cur_dir = init_dir;
     var max_hit_taken = -100;
-    var direction = Direction();
-
-
+    var direction = new Direction();
     var moves_before_change = change_freq;
 
     var score = 0;
@@ -203,6 +201,10 @@ function Bot(game_info, init_param) {
         init_dir = new_init_dir;
         cur_dir = init_dir;
     };
+
+    this.getScoreRecord = function() {
+        return score_record;
+    }
 
     this.getRiskThreshold = function () {
         return risk_map[score - max_damage_allowed];
@@ -356,10 +358,12 @@ function Bot(game_info, init_param) {
 
     this.exploreTheBoard = function () {
         paths = [];
+        score_record = [];
         for (var i = 0; i < max_move; i++) {
             this.makeAMove();
             board_builder.updateBoard(cur_row, cur_col, cur_dir);
             paths.push([cur_row, cur_col]);
+            score_record.push(score);
         }
     };
 }
