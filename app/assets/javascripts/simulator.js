@@ -131,7 +131,8 @@ function runSimulation() {
     var elm_set = board.getElementSettings();;
 
     var game_info = {
-        board: board.clone(),
+//        board: board.clone(),
+        board: board,
         max_score: elm_set.gold.value * gold_total,
         max_damage_allowed: -(elm_set.mine.damage * mine_total, elm_set.enemy.damage * enemy_total),
         worst_damage: Math.max(elm_set.mine.damage, elm_set.enemy.damage),
