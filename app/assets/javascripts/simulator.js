@@ -1,13 +1,14 @@
 // GUI variables
 var canvas; // simulation will be drawn on this canvas
-var board; // 2D array that stores locations of each component
+var initial_board; // 2D array that stores locations of each component
+var simulation_board; // board used to simulate the current generation
 var brush; // with this brush, we will paint our canvas
 var cell_size = 10; // size of each element in the board
-var board_width = 50;
-var board_height = 50;
-var gold_total = 15;
-var mine_total = 10;
-var enemy_total = 20;
+var board_width = 25;
+var board_height = 25;
+var gold_total = 40;
+var mine_total = 5;
+var enemy_total = 10;
 
 // variables that receive user inputs
 var start_button;
@@ -56,7 +57,7 @@ function paintCell(row, col, color) {
 }
 
 function paintBoard() {
-    var cur_board = board.getBoard();
+    var cur_board = simulation_board.getBoard();
     for (var row = 0; row < board_height; row++) {
         for (var col = 0; col < board_width; col++) {
             var element = cur_board[row][col];
@@ -67,9 +68,8 @@ function paintBoard() {
 
 // simulate one step within a generation
 function simulateStep(step_id) {
-//    console.log("step : " + step_id);
     if (step_id < best_path.length) {
-        board.updateBoard(best_path[step_id][0], best_path[step_id][1], "hello");
+        simulation_board.updateBoard(best_path[step_id][0], best_path[step_id][1], "hello");
         paintBoard();
         var caller = arguments.callee;
         simulator = setTimeout(function () {
@@ -95,6 +95,7 @@ function startGeneration() {
 
     // display path taken by the best bot of the current generation
     best_path = result.best_path;
+    simulation_board = initial_board.clone();
     simulateStep(0);
 }
 
@@ -108,21 +109,20 @@ function finishGeneration() {
 }
 
 function createBoard() {
-    board = new Board(board_width, board_height, gold_total, mine_total, enemy_total);
-    board.initBoard();
+    initial_board = new Board(board_width, board_height, gold_total, mine_total, enemy_total);
+    initial_board.initBoard();
+    simulation_board = initial_board.clone();
     paintBoard();
-    console.log("Board initilized....");
-    var wat = board.clone();
 }
 function runSimulation() {
     console.log("simulating at speed " + settings.interval);
 
     // TODO: create bots here
-    var elm_set = board.getElementSettings();;
+    var elm_set = initial_board.getElementSettings();;
 
     var game_info = {
 //        board: board.clone(),
-        board: board,
+        board: initial_board,
         max_score: elm_set.gold.value * gold_total,
         max_damage_allowed: -(elm_set.mine.damage * mine_total, elm_set.enemy.damage * enemy_total),
         worst_damage: Math.max(elm_set.mine.damage, elm_set.enemy.damage),
@@ -131,7 +131,7 @@ function runSimulation() {
     };
 
     // TODO: replace the below line with new BotVillage(settings.bot_total, game_info) later.
-    bots = new BotVillage(25, game_info);
+    bots = new BotVillage(2, game_info);
     bots.initBots();
     startGeneration();
 }

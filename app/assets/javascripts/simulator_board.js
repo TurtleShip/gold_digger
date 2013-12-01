@@ -17,10 +17,6 @@ function Piece(type, dir, color) {
         return dir;
     }
 
-    this.setColor = function (new_color) {
-        color = new_color;
-    }
-
     this.getColor = function () {
         return color;
     }
@@ -39,6 +35,12 @@ function Piece(type, dir, color) {
 
     this.setTotalMove = function(new_total_move) {
         total_move = new_total_move;
+    }
+
+    this.clone = function() {
+        var new_piece = new Piece(type,dir,color);
+        new_piece.setChangeFreq(change_freq);
+        return new_piece;
     }
 }
 
@@ -88,9 +90,20 @@ function Board(board_width, board_height, gold_total, mine_total, enemy_total) {
     var max_change_freq = 10;
 
     this.clone = function() {
-        var new_board = new Board(board_width, board_height, gold_total, mine_total, enemy_total);
-        new_board.setBoard(board.clone());
-        return new_board;
+        var new_board_builder = new Board(board_width, board_height, gold_total, mine_total, enemy_total);
+        var new_board = new Array(board_height);
+        var i,j;
+        for (i = 0; i < board_height; i++) {
+            new_board[i] = new Array(board_width);
+        }
+        for(i=0; i < board_height; i++) {
+            for(j=0; j < board_width; j++) {
+                new_board[i][j] = board[i][j].clone();
+            }
+        }
+        new_board_builder.setBoard(new_board);
+
+        return new_board_builder;
     };
 
     this.getWidth = function() {
