@@ -1,35 +1,36 @@
-function BotVillage(population_size, game_info) {
-    var population_size = population_size;
+function BotVillage(new_population_size, game_info) {
+    var population_size = new_population_size;
     var max_score = game_info.max_score;
     var max_damage_allowed = game_info.max_damage_allowed;
     var risk_map_size = max_score + Math.abs(max_damage_allowed) + 10;
 
     var worst_damage = game_info.worst_damage;
     var mutation_rate = 0.2;
-    var cur_gen = Array(population_size);
+    var cur_gen = new Array(population_size);
     var dir_name = ['up', 'down', 'left', 'right'];
 
     this.initBots = function () {
         for (var i = 0; i < population_size; i++) {
             // create a risk map
-            var cur_risk_map = Array(risk_map_size);
+            var cur_risk_map = new Array(risk_map_size);
             for (var j = 0; j < risk_map_size; j++) {
-                cur_risk_map[j] = getRandNum(0, game_info.worst_damage);
+                cur_risk_map[j] = getRandNum(0, worst_damage);
             }
 
             var init_param = {
                 lefty: getRandNum(0, 1) == 0,
                 risk_map: cur_risk_map,
                 init_dir: dir_name[getRandNum(0, dir_name.length - 1)]
-            }
+            };
             cur_gen[i] = new Bot(game_info, init_param);
         }
-    }
+    };
 
     // sort bots in descending order by score
     this.descendingBotSort = function (bot1, bot2) {
         return bot2.getScore() - bot1.getScore();
-    }
+    };
+
     this.simulateOneGeneration = function () {
 
         var sum_score = 0, survivors = 0;
@@ -43,19 +44,17 @@ function BotVillage(population_size, game_info) {
 
         cur_gen.sort(this.descendingBotSort);
 
-        var result = {
+        return {
             best_path: cur_gen[i].getPath(),
             best_score: cur_gen[i].getScore(),
             avg_score: (sum_score / population_size),
             survival_rate: 1 - (survivors / population_size)
-        }
-
-        return result;
-    }
+        };
+    };
 
     this.shouldMutate = function () {
         return Math.random() <= mutation_rate;
-    }
+    };
 
     this.breedNextGeneration = function() {
 
@@ -63,7 +62,7 @@ function BotVillage(population_size, game_info) {
         var second_bot = (cur_gen.length == 1) ? cur_gen[0] : cur_gen[1]; // second best bot
         var gene_interval = Math.floor(risk_map_size / population_size) * 2;
 
-        cur_gen = Array();
+        cur_gen = [];
 
         for(var t=0; t < 2; t++) {
             var main_bot, support_bot, start, end, gene_from_main;
@@ -90,18 +89,18 @@ function BotVillage(population_size, game_info) {
                 // Fill in risk map
                 for (var j = 0; j < gene_from_main; j++) {
                     new_risk_map[j] =
-                        this.shouldMutate() ? getRandNum(0, game_info.worst_damage) : main_bot.getRiskMap()[j];
+                        this.shouldMutate() ? getRandNum(0, worst_damage) : main_bot.getRiskMap()[j];
                 }
 
                 for (var j = gene_from_main; j < risk_map_size; j++) {
                     new_risk_map[j] =
-                        this.shouldMutate() ? getRandNum(0, game_info.worst_damage) : support_bot.getRiskMap()[j];
+                        this.shouldMutate() ? getRandNum(0, worst_damage) : support_bot.getRiskMap()[j];
                 }
                 var init_param = {
                     lefty: getRandNum(0, 1) == 0,
                     risk_map: new_risk_map,
                     init_dir: dir_name[getRandNum(0, dir_name.length - 1)]
-                }
+                };
 
                 var child = new Bot(game_info, init_param);
 
@@ -152,52 +151,52 @@ function Bot(game_info, init_param) {
         down: [1, 0],
         left: [0, -1],
         right: [0, 1]
-    }
+    };
 
     // Getter and setter methods
     this.getScanRange = function () {
         return scan_range;
-    }
+    };
     this.setScanRange = function (new_scan_range) {
         scan_range = new_scan_range;
-    }
+    };
     this.getMaxMove = function () {
         return max_move;
-    }
+    };
     this.setMaxMove = function (new_max_move) {
         max_move = new_max_move;
-    }
+    };
     this.getChangeFreq = function () {
         return change_freq;
-    }
+    };
     this.setChangeFreq = function (new_change_freq) {
         change_freq = new_change_freq;
-    }
+    };
     this.getIsLefty = function () {
         return is_lefty;
-    }
+    };
     this.setIsLefty = function (new_is_lefty) {
         is_lefty = new_is_lefty;
-    }
+    };
     this.getScore = function () {
         return score;
-    }
+    };
     this.getPath = function() {
         return paths;
-    }
+    };
     this.getIsAlive = function() {
         return is_alive;
-    }
+    };
     this.getRiskMap = function() {
         return risk_map;
-    }
+    };
     this.getInitdir = function() {
         return init_dir;
-    }
+    };
     this.setInitDir = function(new_init_dir) {
         init_dir = new_init_dir;
         cur_dir = init_dir;
-    }
+    };
 
     // Returns the direction where turned left from cur_dir
     this.getLeft = function (cur_dir) {
@@ -216,7 +215,7 @@ function Bot(game_info, init_param) {
                 res = 'up';
         }
         return res;
-    }
+    };
 
     // Return the direction when turned right form cur_dir
     this.getRight = function (cur_dir) {
@@ -236,11 +235,11 @@ function Bot(game_info, init_param) {
                 break;
         }
         return res;
-    }
+    };
 
     this.getRiskThreshold = function () {
         return risk_map[score - max_damage_allowed];
-    }
+    };
 
     // Get next valid coordinate where the bot can move to
     this.getNextCoord = function () {
@@ -263,34 +262,34 @@ function Bot(game_info, init_param) {
                 }
             }
         }
-        var res = {
+
+        return {
             next_row: next_row,
             next_col: next_col,
             next_dir: next_dir
         };
-        return res;
-    }
+    };
 
     // get distance to (row_t, col_t) from the current bot's position
     this.getDist = function (row_t, col_t) {
         return Math.sqrt(Math.pow(cur_row - row_t, 2) + Math.pow(cur_col - col_t, 2));
-    }
+    };
 
     this.isValidCoord = function (row, col) {
         return 0 <= row && row < board_height && 0 <= col && col < board_width;
-    }
+    };
 
     // A direction toward (row_t, col_t) form the current bot's position
     this.getDirection = function (row_t, col_t) {
         if (cur_row == row_t && cur_col == col_t) {
             console.log("Invalid argument given to getDirection");
-            return;
+            return "Invalid";
         }
         if (row_t < cur_row) return "up";
         if (row_t > cur_row) return "down";
         if (col_t < cur_col) return "left";
         return "right";
-    }
+    };
 
     this.makeAMove = function () {
 
@@ -338,7 +337,7 @@ function Bot(game_info, init_param) {
         // get next coordinates
         var next_move = this.getNextCoord();
 
-        // TODO: check if the next move will result in stepping into a threat
+        // check if the next move will result in stepping into a threat
         var next_row = next_move.next_row;
         var next_col = next_move.next_col;
         var next_piece = board[next_row][next_col];
@@ -385,11 +384,11 @@ function Bot(game_info, init_param) {
         }
 
         moves_before_change--;
-    }
+    };
 
 
     this.exploreTheBoard = function () {
-        paths = Array();
+        paths = [];
         console.log("Exploring the board....");
 
         for (var i = 0; i < max_move; i++) {
@@ -399,5 +398,5 @@ function Bot(game_info, init_param) {
         }
 
         console.log("Finished the exploration!");
-    }
+    };
 }
