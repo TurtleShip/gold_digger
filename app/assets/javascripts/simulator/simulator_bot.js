@@ -7,8 +7,14 @@ function BotVillage(new_population_size, game_info) {
     var max_damage_allowed = game_info.max_damage_allowed;
     var risk_map_size = max_score + Math.abs(max_damage_allowed) + 10;
 
-    var worst_damage = game_info.worst_damage;
-    var mutation_rate = 0.2;
+
+    var board = game_info.board.clone();
+    var elm_set = board.getElementSettings();
+    var risk_range = game_info.risk_range;
+
+    var worst_damage = (risk_range * risk_range) * Math.max(elm_set.enemy.damage, elm_set.mine.damage);
+
+    var mutation_rate = 0.05;
     var cur_gen = new Array(population_size);
     var direction = new Direction();
 
@@ -102,20 +108,21 @@ function BotVillage(new_population_size, game_info) {
                 }
                 var init_param = {
                     lefty: getRandNum(0, 1) == 0,
-                    risk_map: new_risk_map,
+                    risk_map: new_risk_map,     
                     init_dir: direction.getRandDir()
                 };
 
                 var child = new Bot(game_info, init_param);
 
                 // apply mutation probability for each gene
-                if(!this.shouldMutate()) {
+                if(!this.shouldMutate()) {      
                     child.setScanRange(main_bot.getScanRange());
                     child.setMaxMove(main_bot.getMaxMove());
                 }
+
                 if(!this.shouldMutate()) child.setChangeFreq(main_bot.getChangeFreq());
                 if(!this.shouldMutate()) child.setIsLefty(main_bot.getIsLefty());
-                if(!this.shouldMutate()) child.setInitDir(main_bot.getInitdir());
+                // if(!this.shouldMutate()) child.setInitDir(main_bot.getInitdir());
 
                 cur_gen.push(child);
                 gene_from_main += gene_interval;
@@ -145,6 +152,9 @@ function Bot(game_info, init_param) {
     var max_hit_taken = -100;
     var direction = new Direction();
     var moves_before_change = change_freq;
+
+
+    var risk_range = game_info.risk_range;
 
     var score = 0;
     var cur_row = 0;
@@ -310,23 +320,54 @@ function Bot(game_info, init_param) {
         // check if the next move will result in stepping into a threat
         var next_row = next_move.next_row;
         var next_col = next_move.next_col;
-        var next_piece = board[next_row][next_col];
+
+
         var threat = 0;
 
-        switch(next_piece.getType()) {
-            case elm_set.mine.type:
-                threat = elm_set.mine.damage;
-                break;
-            case elm_set.enemy.type:
-                threat = elm_set.enemy.damage;
-                break;
+        var row_start_ind, row_end_ind;
+        var col_start_ind, col_end_ind;
+
+        if (cur_row > next_row) {// heading upward
+            row_start_ind = next_row - risk_range;
+            row_end_ind = next_row;
+        } else if (cur_row < next_row){ //heading downward
+            row_start_ind = next_row;
+            row_end_ind = next_row + risk_range;
+        } else {
+            row_start_ind = next_row - risk_range;
+            row_end_ind = next_row + risk_range;threat
         }
+        if (cur_col < next_col){ // Heading right
+            col_start_ind = next_col;
+            col_end_ind = next_col + risk_range;
+        } else if (cur_col > next_col){ //Heading left
+            col_start_ind = next_col - risk_range;
+            col_end_ind = next_col;
+        } else {
+            col_start_ind = next_col - risk_range;
+            col_end_ind = next_col + risk_range;
+        }
+
+        for (var row = Math.max(0, row_start_ind); row < Math.min(board_height - 1, row_end_ind); row++) {
+            for (var col = Math.max(0, col_start_ind); col < Math.min(board_width - 1, col_end_ind); col++) {
+                var next_piece = board[row][col];
+                switch (next_piece.getType()){
+                    case elm_set.mine.type:
+                        threat += elm_set.mine.damage;
+                        break;
+                    case elm_set.enemy.type:
+                        threat += elm_set.enemy.damage;
+                        break;
+                }
+            }
+        }
+    
 
         // we are stepping into a threat that is more than we want to handle
         if (threat > this.getRiskThreshold()) {
             // try different location if possible
-            if (is_lefty) cur_dir = this.getLeft(cur_dir);
-            else cur_dir = this.getRight(cur_dir);
+            if (is_lefty) cur_dir = direction.getLeft(cur_dir);
+            else cur_dir = direction.getRight(cur_dir);
             next_move = this.getNextCoord();
         }
 

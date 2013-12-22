@@ -113,7 +113,6 @@ function Simulator() {
         log += "=========================" + "<br/>";
         event_log.prepend(log);
 
-
         // display path taken by the best bot of the current generation
         best_path = result.best_bot.getPath();
         best_score = result.best_bot.getScoreRecord();
@@ -145,7 +144,9 @@ function Simulator() {
             max_damage: -(elm_set.mine.damage * user_settings.mine_total + elm_set.enemy.damage * user_settings.enemy_total),
             max_damage_allowed: user_settings.damage_allowed,
             ability_limit: Math.floor(board_width*board_height/10),
-            max_change_interval: 10
+            max_change_interval: 10,
+
+            risk_range: 5
         };
 
         cur_gen = new BotVillage(user_settings.bot_total, game_info);
