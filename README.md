@@ -1,9 +1,10 @@
-#Gold Digger
+# Gold Digger
+
 A rails app that shows how genetic algorithm works.
 
 ![Gold Digger Screenshot](app/assets/images/gold_digger.png)
 
-##Brief Overview
+## Brief Overview
 Gold Digger provides a visual simulation of how genetic algorithm works. The app creates a population of bots with random traits, and tries to improve each population through genetic algorithm.
 
 ### Fitness Function
@@ -29,19 +30,13 @@ At each generation, all bots are tested individually against the same environmen
 ## How to run this locally
 1. [Install rails](http://guides.rubyonrails.org/getting_started.html "Ruby on Rails guide")
 2. Pull source code from github
-
-```
-git clone https://github.com/TurtleShip/gold_digger
-```
+  ```
+  git clone https://github.com/TurtleShip/gold_digger
+  ```
 3. Start the server
+  ```
+  cd gold_digger
+  rails s
+  ```
 
-```
-cd gold_digger
-
-rails s
-```
 4. The app is now ready. Check it out by visiting http://localhost:3000
-
-
-
-
